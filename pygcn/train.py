@@ -12,25 +12,36 @@ import torch.optim as optim
 from pygcn.utils import load_data, accuracy
 from pygcn.models import GCN
 
-# Training settings
+# Training settings 设置参数
 parser = argparse.ArgumentParser()
 parser.add_argument('--no-cuda', action='store_true', default=False,
                     help='Disables CUDA training.')
+
+# 默认不用验证 用于加速训练
 parser.add_argument('--fastmode', action='store_true', default=False,
                     help='Validate during training pass.')
 parser.add_argument('--seed', type=int, default=42, help='Random seed.')
 parser.add_argument('--epochs', type=int, default=200,
                     help='Number of epochs to train.')
+
+# 学习率
 parser.add_argument('--lr', type=float, default=0.01,
                     help='Initial learning rate.')
+
+# L2 正则
 parser.add_argument('--weight_decay', type=float, default=5e-4,
                     help='Weight decay (L2 loss on parameters).')
+
+# hidden 是指图卷积层，输出为16维的emmbedding，通过权重矩阵改变
 parser.add_argument('--hidden', type=int, default=16,
-                    help='Number of hidden units.')
+                    help='Number of hidden units.') 
 parser.add_argument('--dropout', type=float, default=0.5,
                     help='Dropout rate (1 - keep probability).')
 
 args = parser.parse_args()
+###############################################################################################
+
+## cuda，1. 没有禁止cuda & 2. 有可用gpu ——> 使用cuda加速
 args.cuda = not args.no_cuda and torch.cuda.is_available()
 
 np.random.seed(args.seed)
@@ -69,6 +80,7 @@ def train(epoch):
     loss_train.backward()
     optimizer.step()
 
+    # 如果需要验证
     if not args.fastmode:
         # Evaluate validation set performance separately,
         # deactivates dropout during validation run.
